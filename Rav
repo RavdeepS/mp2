@@ -1,0 +1,127 @@
+#include<iostream>
+using namespace std;
+
+struct link {
+    int value;
+    link* next;
+    link() { value = 0; next = 0; }
+    link(int _value) { value = _value; next = 0; }
+};
+
+void printList(link*);
+
+int main() {
+    link* eventop = 0;
+    link* oddtop = 0;
+    link* mergetop = 0;
+    link* mergebottom;
+    link* previous = 0;
+    link* current = 0;
+    link* lptr = 0;
+    int invalue;
+
+    // Input values and insert into sorted lists
+    cout << "Input an integer, enter 0 to terminate: " << flush;
+    cin >> invalue;
+    while (invalue != 0) {
+        link* newNode = new link(invalue);
+        
+        // Insert into the even list
+        if (invalue % 2 == 0) {
+            if (eventop == 0 || eventop->value < newNode->value) {
+                newNode->next = eventop;
+                eventop = newNode;
+            } else {
+                link* temp = eventop;
+                while (temp->next && temp->next->value >= newNode->value) {
+                    temp = temp->next;
+                }
+                newNode->next = temp->next;
+                temp->next = newNode;
+            }
+        }
+        // Insert into the odd list
+        else {
+            if (oddtop == 0 || oddtop->value < newNode->value) {
+                newNode->next = oddtop;
+                oddtop = newNode;
+            } else {
+                link* temp = oddtop;
+                while (temp->next && temp->next->value >= newNode->value) {
+                    temp = temp->next;
+                }
+                newNode->next = temp->next;
+                temp->next = newNode;
+            }
+        }
+
+        cout << "Input an integer, enter 0 to terminate: " << flush;
+        cin >> invalue;
+    }
+
+    // Print the two lists
+    printList(oddtop);
+    cout << "\n\n";
+    printList(eventop);
+    cout << "\n\n";
+
+    // Merge the two lists into a single sorted list
+    mergetop = mergebottom = 0;
+    while (oddtop || eventop) {
+        link* newNode;
+        if (oddtop && (!eventop || oddtop->value >= eventop->value)) {
+            newNode = new link(oddtop->value);
+            oddtop = oddtop->next;
+        } else {
+            newNode = new link(eventop->value);
+            eventop = eventop->next;
+        }
+
+        if (mergetop == 0) {
+            mergetop = newNode;
+        } else {
+            mergebottom->next = newNode;
+        }
+        mergebottom = newNode;
+    }
+
+    printList(mergetop);
+    cout << "\n\n";
+
+    // Remove odd values from the merged list
+    previous = 0;
+    current = mergetop;
+    while (current) {
+        if (current->value % 2 != 0) {
+            if (previous == 0) {
+                mergetop = current->next;
+            } else {
+                previous->next = current->next;
+            }
+            delete current;
+            current = previous ? previous->next : mergetop;
+        } else {
+            previous = current;
+            current = current->next;
+        }
+    }
+
+    printList(mergetop);
+
+    // Clean up memory
+    while (mergetop) {
+        lptr = mergetop;
+        mergetop = mergetop->next;
+        delete lptr;
+    }
+
+    return 0;
+}
+
+void printList(link* list) {
+    while (list != 0) {
+        cout << list->value << " ";
+        list = list->next;
+    }
+    cout << endl;
+}
